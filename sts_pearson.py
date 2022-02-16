@@ -124,6 +124,13 @@ def getEditDistance(t1_toks, t2_toks):
     return ed_dist
 
 
+def check_symmetry(x, y):
+    """Use assertion to verify the metric is symmetrical
+    if the assertion holds, execution continues. If it does not, the program crashes
+    """
+    assert x == y, f"The metric is not symmetrical! Got {x} and {y}"
+
+
 def main(sts_data):
     """Calculate pearson correlation between semantic similarity scores and string similarity metrics.
     Data is formatted as in the STS benchmark"""
@@ -149,30 +156,41 @@ def main(sts_data):
         t1_toks = getToksFromPairTexts(pair_text)[0]
         t2_toks = getToksFromPairTexts(pair_text)[1]
 
+        # Check the symmetry of metrics simultaneously
         # NIST
-        nist_pair = getNISTScore(t1_toks, t2_toks)
-        nist_scores.append(nist_pair)
+        nist_pair1 = getNISTScore(t1_toks, t2_toks)
+        nist_pair2 = getNISTScore(t2_toks, t1_toks)
+        check_symmetry(nist_pair1, nist_pair2)
+        nist_scores.append(nist_pair1)
     # print(nist_scores[0:10])
 
         # BLEU
-        bleu_pair = getBLEUScore(t1_toks, t2_toks)
-        bleu_scores.append(bleu_pair)
+        bleu_pair1 = getBLEUScore(t1_toks, t2_toks)
+        bleu_pair2 = getBLEUScore(t2_toks, t1_toks)
+        check_symmetry(bleu_pair1, bleu_pair2)
+        bleu_scores.append(bleu_pair1)
     # print(bleu_scores[0:10])
 
         # WER
-        wer_pair = getWER(pair_text)
-        wer_scores.append(wer_pair)
+        wer_pair1 = getWER(pair_text)
+        wer_pair2 = getWER(pair_text)
+        check_symmetry(wer_pair1, wer_pair2)
+        wer_scores.append(wer_pair1)
     # print(wer_scores[0:10])
 
         # LCS
         # lcs_pair = getLCS_recursive(t1_toks, t2_toks, len(t1_toks), len(t2_toks))
-        lcs_pair = getLCS(t1_toks, t2_toks)
-        lcs_scores.append(lcs_pair)
+        lcs_pair1 = getLCS(t1_toks, t2_toks)
+        lcs_pair2 = getLCS(t1_toks, t2_toks)
+        check_symmetry(lcs_pair1, lcs_pair2)
+        lcs_scores.append(lcs_pair1)
     # print(lcs_scores[0:10])
 
         # Edit Distance
-        edi_dist_pair = getEditDistance(t1_toks, t2_toks)
-        edit_dist_scores.append(edi_dist_pair)
+        edi_dist_pair1 = getEditDistance(t1_toks, t2_toks)
+        edi_dist_pair2 = getEditDistance(t1_toks, t2_toks)
+        check_symmetry(edi_dist_pair1, edi_dist_pair2)
+        edit_dist_scores.append(edi_dist_pair1)
     # print(edit_dist_scores[0:10])
 
     # TODO 3: Calculate pearson r between each metric and the STS labels and report in the README.
