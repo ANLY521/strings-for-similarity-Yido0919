@@ -49,7 +49,7 @@ def main(sts_data):
 
     scores = []
     for label, text_pair in sample_data:
-        print(label)
+        # print(label)
         print(f"Sentences: {texts[0]}\t{texts[1]}")
         # TODO 2: Calculate NIST for each pair of sentences
         # Define the function symmetrical_nist
