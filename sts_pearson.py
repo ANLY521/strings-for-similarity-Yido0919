@@ -172,23 +172,21 @@ def main(sts_data):
     # print(bleu_scores[0:10])
 
         # WER
-        wer_pair1 = getWER(pair_text)
-        wer_pair2 = getWER(pair_text)
-        check_symmetry(wer_pair1, wer_pair2)
-        wer_scores.append(wer_pair1)
+        wer_pair = getWER(pair_text)
+        wer_scores.append(wer_pair)
     # print(wer_scores[0:10])
 
         # LCS
         # lcs_pair = getLCS_recursive(t1_toks, t2_toks, len(t1_toks), len(t2_toks))
         lcs_pair1 = getLCS(t1_toks, t2_toks)
-        lcs_pair2 = getLCS(t1_toks, t2_toks)
+        lcs_pair2 = getLCS(t2_toks, t1_toks)
         check_symmetry(lcs_pair1, lcs_pair2)
         lcs_scores.append(lcs_pair1)
     # print(lcs_scores[0:10])
 
         # Edit Distance
         edi_dist_pair1 = getEditDistance(t1_toks, t2_toks)
-        edi_dist_pair2 = getEditDistance(t1_toks, t2_toks)
+        edi_dist_pair2 = getEditDistance(t2_toks, t1_toks)
         check_symmetry(edi_dist_pair1, edi_dist_pair2)
         edit_dist_scores.append(edi_dist_pair1)
     # print(edit_dist_scores[0:10])
