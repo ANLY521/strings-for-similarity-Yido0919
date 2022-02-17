@@ -48,24 +48,13 @@ def getBLEUScore(t1_toks, t2_toks):
     return bleu_pair
 
 
-def getWER(pair_text):
-    t1, t2 = pair_text
-    # Reference: https://pypi.org/project/jiwer/
-    # get tidy texts
-    transformation = jiwer.Compose([
-        jiwer.ToLowerCase(),
-        jiwer.RemoveWhiteSpace(replace_by_space=True),
-        jiwer.RemoveMultipleSpaces(),
-        jiwer.ReduceToListOfListOfWords(word_delimiter=" ")
-    ])
-    # get word error rate
-    wer_pair = jiwer.wer(
-        t1,
-        t2,
-        truth_transform=transformation,
-        hypothesis_transform=transformation
-    )
-    return wer_pair
+def getWER(t1_toks, t2_toks):
+    """
+    calculate WER using edit distance over tokens and turn it into a "rate" based on length in tokens
+    """
+    we_dist = edit_distance(t1_toks, t2_toks)
+    we_rate = we_dist/len(t1_toks) + we_dist/len(t2_toks)
+    return we_rate
 
 
 # reference: https://www.geeksforgeeks.org/python-program-for-longest-common-subsequence/
@@ -73,7 +62,7 @@ def getLCS_recursive(X, Y, m, n):
     """find the length of longest subsequence present in two text sequences
     args:
         - X: a list of tokens of sequence 1
-        - Y:a list of tokens of sequence 2
+        - Y: a list of tokens of sequence 2
         - m: the length of list X
         - n:the length of list Y
     return:
@@ -119,9 +108,47 @@ def getLCS(X, Y):
     return L[m][n]
 
 
-def getEditDistance(t1_toks, t2_toks):
-    ed_dist = edit_distance(t1_toks, t2_toks)
-    return ed_dist
+def getEditDistance(s1, s2):
+    """
+    Find minimum number of edits (operations) required to convert ‘str1’ into ‘str2’
+    args:
+        - s1: a string/token
+        - s2: a string/token
+    return:
+        the minimum number of edits (operations) required to convert a string s1 to s2
+    """
+    m = len(s1)
+    n = len(s2)
+    # Create a table to store results of subproblems
+    dp = [[0 for x in range(n + 1)] for x in range(m + 1)]
+
+    # Fill d[][] in bottom up manner
+    for i in range(m + 1):
+        for j in range(n + 1):
+
+            # If first string is empty, only option is to
+            # insert all characters of second string
+            if i == 0:
+                dp[i][j] = j  # Min. operations = j
+
+            # If second string is empty, only option is to
+            # remove all characters of second string
+            elif j == 0:
+                dp[i][j] = i  # Min. operations = i
+
+            # If last characters are same, ignore last char
+            # and recur for remaining string
+            elif s1[i - 1] == s2[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1]
+
+            # If last character are different, consider all
+            # possibilities and find minimum
+            else:
+                dp[i][j] = 1 + min(dp[i][j - 1],  # Insert
+                                   dp[i - 1][j],  # Remove
+                                   dp[i - 1][j - 1])  # Replace
+
+    return dp[m][n]
 
 
 def check_symmetry(x, y):
@@ -153,6 +180,7 @@ def main(sts_data):
     edit_dist_scores = []
     for label, pair_text in data:
         # get tokens of each sentence
+        t1, t2 = pair_text
         t1_toks = getToksFromPairTexts(pair_text)[0]
         t2_toks = getToksFromPairTexts(pair_text)[1]
 
@@ -172,8 +200,10 @@ def main(sts_data):
     # print(bleu_scores[0:10])
 
         # WER
-        wer_pair = getWER(pair_text)
-        wer_scores.append(wer_pair)
+        wer_pair1 = getWER(t1_toks, t2_toks)
+        wer_pair2 = getWER(t2_toks, t1_toks)
+        check_symmetry(wer_pair1, wer_pair2)
+        wer_scores.append(wer_pair1)
     # print(wer_scores[0:10])
 
         # LCS
@@ -184,11 +214,13 @@ def main(sts_data):
         lcs_scores.append(lcs_pair1)
     # print(lcs_scores[0:10])
 
-        # Edit Distance
-        edi_dist_pair1 = getEditDistance(t1_toks, t2_toks)
-        edi_dist_pair2 = getEditDistance(t2_toks, t1_toks)
-        check_symmetry(edi_dist_pair1, edi_dist_pair2)
-        edit_dist_scores.append(edi_dist_pair1)
+        # Edit Distance - Levenshtein distance is over characters, not words/tokens
+        min_editdist1 = getEditDistance(t1, t2)
+        # symmetry validation
+        min_editdist2 = getEditDistance(t2, t1)
+        check_symmetry(min_editdist1, min_editdist2)
+        edit_dist_scores.append(min_editdist1)
+
     # print(edit_dist_scores[0:10])
 
     # TODO 3: Calculate pearson r between each metric and the STS labels and report in the README.
