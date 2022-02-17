@@ -24,11 +24,9 @@ Metric | Train | Dev | Test
 ------ | ----- | --- | ----
 NIST | 0.496 | 0.593 | 0.475
 BLEU | 0.371 | 0.433 | 0.353
-WER | -0.324 | -0.452| -0.326
+WER | -0.353 | -0.452| -0.358
 LCS | 0.385 | 0.468| 0.344
-Edit Dist | -0.019 | -0.175| -0.096
-
-Q: My output from Edit Distance metric for DEV dataset is -0.22, with only a slight variation from the expected output provided in the form. But I have no idea why the outputs for train and test datasets are quite different from the expected result as well as the values of each other.
+Edit Dist | 0.033 | -0.175| -0.039
 
 **TODO:**
 Show usage of the homework script with command line flags (see example under lab, week 1).
